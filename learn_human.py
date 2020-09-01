@@ -3,16 +3,16 @@ from game import Game
 import copy
 
 class LearnHuman:
-    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards):
+    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback):
         self.teacher = teacher
         self.learner = learner
         self.init_ws = init_ws
         self.mode = '%omni_cont'
         self.test_set = test_set
         self.teacher_rewards = teacher_rewards
-        self.feedback = True
+        self.feedback = feedback
         
-        self.iteration_limit = 30
+        self.iteration_limit = train_iter
         self.step = 0
         self.batches = []
         self.ws = []
@@ -29,9 +29,11 @@ class LearnHuman:
         data_idx, self.gradients = self.teacher.choose(self.learner.current_mean_, self.learner.lr_, hard = True)
         
         if self.feedback:
-            self.g = Game(self.teacher_rewards, self.batches[-1], copy.deepcopy(self.learner.q_map_), copy.deepcopy(self.learner.current_mean_), self.step, data_idx)
+            self.g = Game(self.teacher_rewards, self.batches[-1], copy.deepcopy(self.learner.q_map_),
+                          copy.deepcopy(self.learner.current_mean_), self.step, data_idx)
         else:
-            self.g = Game(teacher_rewards, batches[-1], copy.deepcopy(learner.q_map_), copy.deepcopy(learner.current_mean_))
+            self.g = Game(self.teacher_rewards, self.batches[-1], copy.deepcopy(self.learner.q_map_),
+                          copy.deepcopy(self.learner.current_mean_), self.step)
 
         self.g.display()
 

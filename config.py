@@ -2,6 +2,7 @@
 
 use_tf = False
 multi_thread = False
+feedback = True
 
 shape = 5
 lr = 1.5e-2
