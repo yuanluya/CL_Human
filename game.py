@@ -3,8 +3,7 @@ import numpy as np
 from matplotlib.colors import ListedColormap
 from matplotlib import cm 
 from matplotlib.patches import FancyArrow
-import time, sys
-import pdb 
+
 class Game:
 	def __init__(self, gt_rewards, batch, policy, learned_rewards, iteration, data_idx=None):
 		self.shape = int(np.sqrt(gt_rewards.shape[0]))
@@ -153,7 +152,6 @@ class Game:
 				if (self.teacher_idx_ is not None):
 					self.correct_arrow_.set_color('green')
 					fig.canvas.draw()
-					sleep(1)
 					plt.close('all')#fig.canvas.mpl_connect('pick_event', close_all)
 				else:
 					plt.close('all')

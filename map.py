@@ -1,18 +1,15 @@
 import numpy as np
 import copy
-from collections import defaultdict
-from easydict import EasyDict as edict
-
-import pdb
+#from collections import defaultdict
 
 class Map:
     def __init__(self, config):
         self.config_ = config
-        self.shape_ = self.config_.shape
+        self.shape_ = self.config_['shape']
         self.num_states_ = self.shape_ * self.shape_
         self.actions_ = 'udlr'
         self.state_feats_ = np.identity(self.num_states_)
-        if self.config_.shuffle_state_feat:
+        if self.config_['shuffle_state_feat']:
             self.feat_idx_ = np.arange(self.num_states_)
             np.random.shuffle(self.feat_idx_)
             self.state_feats_ = self.state_feats_[self.feat_idx_, ...]
@@ -23,11 +20,11 @@ class Map:
         self.gamma_ = 0.5
         self.vi_eps_ = 1e-6
         self.reward_param_ = None
-        if self.config_.approx_type == 'p-norm':
-            self.approx_k_ = self.config_.approx_k
+        if self.config_['approx_type'] == 'p-norm':
+            self.approx_k_ = self.config_['approx_k']
             self.approx_max_ = lambda vals, k, a: np.power(np.sum(np.power(np.array(vals), k), axis = a), 1.0 / k)
-        elif self.config_.approx_type == 'gsm':
-            self.approx_k_ = self.config_.approx_k
+        elif self.config_['approx_type'] == 'gsm':
+            self.approx_k_ = self.config_['approx_k']
             self.approx_max_ = lambda vals, k, a: np.max(np.array(vals), axis = a) +\
                                                   np.log(np.sum(np.exp(k * (np.array(vals) -\
                                                                             np.max(np.array(vals),
@@ -57,7 +54,7 @@ class Map:
 
     def get_dest(self, start, direct):
         assert(start < self.num_states_)
-        targets = defaultdict(float)
+        targets = {}
         for a in self.actions_:
             if a == 'u':
                 dest = start - self.shape_ if start >= self.shape_ else start
@@ -66,7 +63,9 @@ class Map:
             elif a == 'l':
                 dest = start - 1 if start % self.shape_ != 0 else start
             elif a == 'r':
-                dest = start + 1 if start % self.shape_ != self.shape_ - 1 else start
+                dest = start + 1 if start % self.shape_ != self.shape_ - 1 else start      
+            if dest not in targets:
+                targets[dest] = 0
             if a == direct:
                 targets[dest] += 1 - self.move_eps_ - self.death_prob_
             else:
@@ -200,10 +199,10 @@ class Map:
         value_map = np.random.uniform(size = [self.num_states_, self.num_states_]) if value_map_init is None else value_map_init
         diff = 1e3
         vi_iter = 0
-        if self.config_.approx_type == 'p-norm':
+        if self.config_['approx_type'] == 'p-norm':
             factor = np.power(np.sum(np.power(q_map, self.approx_k_), axis = 1), (1 - self.approx_k_) / self.approx_k_)
             factor_a = np.power(q_map, self.approx_k_ - 1)
-        elif self.config_.approx_type == 'gsm':
+        elif self.config_['approx_type'] == 'gsm':
             q_map_balance = q_map - np.max(q_map, axis = 1, keepdims = True)
             factor = 1 / np.sum(np.exp(self.approx_k_ * q_map_balance), axis = 1)
             factor_a = np.exp(self.approx_k_ * q_map_balance)
