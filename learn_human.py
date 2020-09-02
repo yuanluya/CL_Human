@@ -6,6 +6,7 @@ class LearnHuman:
     def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback):
         self.teacher = teacher
         self.learner = learner
+        self.learner.reset(init_ws)
         self.init_ws = init_ws
         self.mode = '%omni_cont'
         self.test_set = test_set
@@ -13,6 +14,7 @@ class LearnHuman:
         self.feedback = feedback
         
         self.iteration_limit = train_iter
+        self.idx_selected = True
         self.step = 0
         self.batches = []
         self.ws = []
@@ -21,27 +23,30 @@ class LearnHuman:
         self.selected_indices = []
         
     def chooseIdx(self):                
-        self.step += 1
-        self.teacher.sample()
-        self.learned_rewards.append(copy.deepcopy(self.learner.current_mean_))
-        self.batches.append([self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_])
-        action_probs = self.learner.current_action_prob()
+        if self.idx_selected:
+            self.step += 1
+            self.teacher.sample()
+            self.learned_rewards.append(copy.deepcopy(self.learner.current_mean_))
+            self.batches.append([self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_])
+            action_probs = self.learner.current_action_prob()
+        else:
+            self.idx_selected = True
         data_idx, self.gradients = self.teacher.choose(self.learner.current_mean_, self.learner.lr_, hard = True)
         
         if self.feedback:
             self.g = Game(self.teacher_rewards, self.batches[-1], copy.deepcopy(self.learner.q_map_),
-                          copy.deepcopy(self.learner.current_mean_), self.step, data_idx)
+                          copy.deepcopy(self.learner.current_mean_), self.step, self.iteration_limit, data_idx)
         else:
             self.g = Game(self.teacher_rewards, self.batches[-1], copy.deepcopy(self.learner.q_map_),
-                          copy.deepcopy(self.learner.current_mean_), self.step)
+                          copy.deepcopy(self.learner.current_mean_), self.step, self.iteration_limit)
 
         self.g.display()
 
     def updateLearner(self):
         if self.g.selected_idx_==None:
-            self.reset()
+            self.idx_selected = False
             print('Please select an arrow before running a new iteration.')
-            exit()
+            return
         data_idx = self.g.selected_idx_
         self.selected_indices.append(data_idx)
         w = self.learner.learn_cont(self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_, data_idx,
@@ -63,6 +68,7 @@ class LearnHuman:
       
     def reset(self):
         self.step = 0
+        self.learner.reset(self.init_ws)
         self.batches = []
         self.ws = []
         self.learned_rewards = []
