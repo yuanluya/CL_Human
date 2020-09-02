@@ -4,9 +4,10 @@ import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from apiclient.http import MediaFileUpload
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ['https://www.googleapis.com/auth/drive']
 
 def main():
     """Shows basic usage of the Drive v3 API.
@@ -44,6 +45,13 @@ def main():
         print('Files:')
         for item in items:
             print(u'{0} ({1})'.format(item['name'], item['id']))
+    
+    file_metadata = {'name': 'photo.jpg'}
+    media = MediaFileUpload('photo.jpg', mimetype='image/jpeg')
+    file = service.files().create(body=file_metadata,
+                                        media_body=media,
+                                        fields='id').execute()
+    print('File ID: %s' % file.get('id'))
 
 if __name__ == '__main__':
     main()
