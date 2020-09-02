@@ -17,7 +17,8 @@ class Game:
 		self.iter_ = iter_num
 		self.total_iters_ = total_iters 
 		self.selected_idx_ = None
-		self.arrows = []
+		self.arrows0 = []
+		self.arrows1 = []
 
 	def __index_to_arrow(self, n, direction):
 		size = self.shape
@@ -88,7 +89,7 @@ class Game:
 		reward_min = np.min(self.gt_rewards_)
 		reward_max = np.max(self.gt_rewards_)
 
-		fig, ax = plt.subplots(1, 3, figsize=(10, 3), constrained_layout=True)
+		fig, ax = plt.subplots(1, 3, figsize=(7.5, 2.5), constrained_layout=True)
 
 		for i in range(3):
 			if i == 0:
@@ -112,7 +113,7 @@ class Game:
 
 		for p in range(len(self.batch_[0])):
 			x2, y2, dx2, dy2, rx, ry = self.__index_to_arrow(self.batch_[0][p], self.batch_[1][p])
-			self.arrows.append(ax[0].arrow(x2, y2, dx2 * scale, dy2 * scale, head_width=0.25, head_length=0.25, fc='k', ec='k', gid=p, picker=True))
+			self.arrows0.append(ax[0].arrow(x2, y2, dx2 * scale, dy2 * scale, head_width=0.25, head_length=0.25, fc='k', ec='k', gid=p, picker=True))
 
 			rect = Rectangle((rx, ry), 1, 1, fill=False, linewidth = 0.1, alpha=1, gid=p, picker=True)
 			ax[0].add_patch(rect)
@@ -123,7 +124,7 @@ class Game:
 
 		for p in range(len(self.batch_[0])):
 			x2, y2, dx2, dy2, rx, ry = self.__index_to_arrow(self.batch_[0][p], self.batch_[1][p])
-			ax[1].arrow(x2, y2, dx2 * scale, dy2 * scale, head_width=0.25, head_length=0.25, fc='k', ec='k', gid=p, picker=True)
+			self.arrows1.append(ax[1].arrow(x2, y2, dx2 * scale, dy2 * scale, head_width=0.25, head_length=0.25, fc='k', ec='k', gid=p, picker=True))
 
 			rect = Rectangle((rx, ry), 1, 1, fill=False, linewidth = 0.1, alpha=1, gid=p, picker=True)
 			ax[1].add_patch(rect)
@@ -155,16 +156,16 @@ class Game:
 				print(artist._gid)
 
 				if (self.selected_idx_ is not None):
-					self.arrows[self.selected_idx_].set_color('black')
-
+					self.arrows0[self.selected_idx_].set_color('black')
+					self.arrows1[self.selected_idx_].set_color('black')
 				self.selected_idx_ = artist._gid
 
-				self.arrows[self.selected_idx_].set_color('green')
-
+				self.arrows0[self.selected_idx_].set_color('green')
+				self.arrows1[self.selected_idx_].set_color('green')
 				# show correct choice
 				if (self.teacher_idx_ is not None): 
-					self.arrows[self.teacher_idx_].set_color('y')
-
+					self.arrows0[self.teacher_idx_].set_color('y')
+					self.arrows1[self.teacher_idx_].set_color('y')
 				fig.canvas.draw()
 				fig.canvas.mpl_connect('key_press_event', close_all)
 
