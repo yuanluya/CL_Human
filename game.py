@@ -160,8 +160,8 @@ class Game:
 		def show_teacher(event):
 			if (self.selected_idx_ is not None) and (event.key == 'y' or event.key == 'c'):
 				if (self.teacher_idx_ is not None):
-					self.arrows0[self.teacher_idx_].set_color('darkorange')
-					self.arrows1[self.teacher_idx_].set_color('y')
+					self.arrows0[self.teacher_idx_].set_color('saddlebrown')
+					self.arrows1[self.teacher_idx_].set_color('saddlebrown')
 				
 				text.set_text('Click the "run" button in the menubar to run the text iteration')
 				fig.canvas.draw()

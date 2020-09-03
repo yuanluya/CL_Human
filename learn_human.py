@@ -76,7 +76,7 @@ class LearnHuman:
         self.selected_indices = []
         
     def iteration(self):
-        if self.step > 0:
+        if (self.step > 0) and (self.step <= self.iteration_limit):
             self.updateLearner()
         if self.step < self.iteration_limit:
             self.chooseIdx()
