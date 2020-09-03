@@ -91,9 +91,7 @@ class Game:
 
 		fig, ax = plt.subplots(1, 3, figsize=(7.9, 3))#, constrained_layout=True)
 		text = fig.text(0.4,0.1, "")
-		print('ax0', ax[0].get_position())
-		print('ax1', ax[1].get_position())
-		print('ax2', ax[2].get_position())
+
 		ax[0].set_position([0.05, 0.20399999999999999, 0.2, 0.7])
 		ax[1].set_position([0.4, 0.20399999999999999, 0.2, 0.7])
 		ax[2].set_position([0.729, 0.20399999999999999, 0.2, 0.7])
@@ -160,11 +158,10 @@ class Game:
 				plt.close('all')
 
 		def show_teacher(event):
-			print('key press')
-			print(self.selected_idx_)
-			if self.selected_idx_ is not None and (event.key == 'y' or event.key == 'c'):
-				self.arrows0[self.teacher_idx_].set_color('y')
-				self.arrows1[self.teacher_idx_].set_color('y')
+			if (self.selected_idx_ is not None) and (event.key == 'y' or event.key == 'c'):
+				if (self.teacher_idx_ is not None):
+					self.arrows0[self.teacher_idx_].set_color('darkorange')
+					self.arrows1[self.teacher_idx_].set_color('y')
 				
 				text.set_text('Click the "run" button in the menubar to run the text iteration')
 				fig.canvas.draw()
@@ -178,6 +175,9 @@ class Game:
 				if (self.selected_idx_ is not None):
 					self.arrows0[self.selected_idx_].set_color('black')
 					self.arrows1[self.selected_idx_].set_color('black')
+				if (self.teacher_idx_ is not None):
+					self.arrows0[self.teacher_idx_].set_color('black')
+					self.arrows1[self.teacher_idx_].set_color('black')
 				self.selected_idx_ = artist._gid
 
 				self.arrows0[self.selected_idx_].set_color('green')
