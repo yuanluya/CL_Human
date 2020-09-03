@@ -4,8 +4,8 @@ from matplotlib.colors import ListedColormap
 from matplotlib import cm 
 from matplotlib.patches import Rectangle
 from matplotlib.patches import FancyArrow
-import time
-import pdb 
+import time 
+
 class Game:
 	def __init__(self, gt_rewards, batch, policy, learned_rewards, iter_num, total_iters, data_idx=None):
 		self.shape = int(np.sqrt(gt_rewards.shape[0]))
@@ -89,8 +89,14 @@ class Game:
 		reward_min = np.min(self.gt_rewards_)
 		reward_max = np.max(self.gt_rewards_)
 
-		fig, ax = plt.subplots(1, 3, figsize=(7.5, 2.5), constrained_layout=True)
-
+		fig, ax = plt.subplots(1, 3, figsize=(7.9, 3))#, constrained_layout=True)
+		text = fig.text(0.4,0.1, "")
+		print('ax0', ax[0].get_position())
+		print('ax1', ax[1].get_position())
+		print('ax2', ax[2].get_position())
+		ax[0].set_position([0.05, 0.20399999999999999, 0.2, 0.7])
+		ax[1].set_position([0.4, 0.20399999999999999, 0.2, 0.7])
+		ax[2].set_position([0.729, 0.20399999999999999, 0.2, 0.7])
 		for i in range(3):
 			if i == 0:
 				ax[i].imshow(self.gt_rewards_, interpolation='none', cmap=cmap, vmin=reward_min, vmax=reward_max, extent=[0, size, 0, size], zorder=0, picker=10)
@@ -143,14 +149,28 @@ class Game:
 
 		ax[2].set_title('Most Probable Learner Actions')
 
-		fig.suptitle("Training Iteration %d of %d" % (self.iter_, self.total_iters_))
+		fig.suptitle("Training Iteration %d of %d" % (self.iter_, self.total_iters_), size='large')
 
 		# --- Add pick
 		def close_all(event):
 			if event.key == 'y' or event.key == 'c':
+				self.arrows0[self.teacher_idx_].set_color('y')
+				self.arrows1[self.teacher_idx_].set_color('y')
+				
 				plt.close('all')
 
+		def show_teacher(event):
+			print('key press')
+			print(self.selected_idx_)
+			if self.selected_idx_ is not None and (event.key == 'y' or event.key == 'c'):
+				self.arrows0[self.teacher_idx_].set_color('y')
+				self.arrows1[self.teacher_idx_].set_color('y')
+				
+				text.set_text('Click the "run" button in the menubar to run the text iteration')
+				fig.canvas.draw()
+				#plt.close('all')
 		def onpick(event):
+			text.set_text('Press "c" to confirm the selected arrow')
 			artist = event.artist
 			if isinstance(artist, FancyArrow) or isinstance(artist, Rectangle):
 				print(artist._gid)
@@ -162,13 +182,14 @@ class Game:
 
 				self.arrows0[self.selected_idx_].set_color('green')
 				self.arrows1[self.selected_idx_].set_color('green')
+				
+				
 				# show correct choice
-				if (self.teacher_idx_ is not None): 
-					self.arrows0[self.teacher_idx_].set_color('y')
-					self.arrows1[self.teacher_idx_].set_color('y')
+				'''if (self.teacher_idx_ is not None): 
+					fig.canvas.mpl_connect('key_press_event', show_teacher)
+				'''
 				fig.canvas.draw()
-				fig.canvas.mpl_connect('key_press_event', close_all)
-
+		fig.canvas.mpl_connect('key_press_event', show_teacher)
 
 		fig.canvas.mpl_connect('pick_event', onpick)
 		plt.show()
