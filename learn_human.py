@@ -58,7 +58,8 @@ class LearnHuman:
         self.ws.append(copy.deepcopy(w))
         #print(learner.q_map_)
         self.policy.append(copy.deepcopy(self.learner.q_map_))
-        
+        if self.step == self.iteration_limit:
+            print('All iterations are completed.')
     def saveData(self):
         data = {
                 'batches': self.batches,
