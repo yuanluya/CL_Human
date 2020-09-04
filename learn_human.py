@@ -1,9 +1,10 @@
 import numpy as np
 from game import Game
 import copy
+from session import Session
 
 class LearnHuman:
-    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback):
+    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback, map_num, s):
         self.teacher = teacher
         self.learner = learner
         self.learner.reset(init_ws)
@@ -12,12 +13,14 @@ class LearnHuman:
         self.test_set = test_set
         self.teacher_rewards = teacher_rewards
         self.feedback = feedback
-        
+        self.map_num = map_num
+        self.sess = s
+
         self.iteration_limit = train_iter
         self.idx_selected = True
         self.step = 0
         self.batches = []
-        self.ws = []
+        self.ws = [copy.deepcopy(init_ws)]
         self.learned_rewards = []
         self.policy = []
         self.selected_indices = []
@@ -64,8 +67,10 @@ class LearnHuman:
                 'policy': self.policy,
                 'selected_indices': self.selected_indices
                }
-        np.save('data.npy', data, allow_pickle=True)
-      
+        np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
+
+        self.sess.save_data() 
+        
     def reset(self):
         self.step = 0
         self.learner.reset(self.init_ws)
