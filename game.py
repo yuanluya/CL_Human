@@ -160,12 +160,12 @@ class Game:
 		def show_teacher(event):
 			if (self.selected_idx_ is not None) and (event.key == 'y' or event.key == 'c'):
 				if (self.teacher_idx_ is not None):
-					self.arrows0[self.teacher_idx_].set_color('saddlebrown')
-					self.arrows1[self.teacher_idx_].set_color('saddlebrown')
+					self.arrows0[self.teacher_idx_].set_color('darkorange')
+					self.arrows1[self.teacher_idx_].set_color('darkorange')
 				text.set_position((0.25,0.1))
-				text.set_text('Click the "‣" button in the menubar to run the text iteration')
+				text.set_text('Click the "‣" button in the menubar to run the next iteration')
 				fig.canvas.draw()
-				#plt.close('all')
+				plt.close('all')
 		def onpick(event):
 			text.set_position((0.31,0.1))
 			text.set_text('Press "c" to confirm the selected arrow')
