@@ -162,11 +162,12 @@ class Game:
 				if (self.teacher_idx_ is not None):
 					self.arrows0[self.teacher_idx_].set_color('saddlebrown')
 					self.arrows1[self.teacher_idx_].set_color('saddlebrown')
-				
-				text.set_text('Click the "run" button in the menubar to run the text iteration')
+				text.set_position((0.25,0.1))
+				text.set_text('Click the "‣" button in the menubar to run the text iteration')
 				fig.canvas.draw()
 				#plt.close('all')
 		def onpick(event):
+			text.set_position((0.31,0.1))
 			text.set_text('Press "c" to confirm the selected arrow')
 			artist = event.artist
 			if isinstance(artist, FancyArrow) or isinstance(artist, Rectangle):
