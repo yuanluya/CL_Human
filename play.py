@@ -5,11 +5,15 @@ from map import Map
 from teacher_irl import TeacherIRL
 from learner_irl import LearnerIRL
 from learn_human import LearnHuman
+from session import Session 
+
 exec('import config', globals())
 exec('from config import config_T', globals())
 exec('from config import config_L', globals())
 
 def run(map_num):
+    s = Session(map_num)
+
     mode = config.mode
 
     train_iter = config.train_iter
@@ -33,5 +37,5 @@ def run(map_num):
     unshuffled_ws = copy.deepcopy(init_ws)
     test_set = np.random.choice(teacher.map_.num_states_, size = [train_iter + 1, teacher.map_.num_states_ * 20])
     learner = LearnerIRL(map_l, config_L)
-    lfh = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback)
+    lfh = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s)
     return lfh
