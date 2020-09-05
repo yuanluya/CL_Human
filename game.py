@@ -89,7 +89,7 @@ class Game:
 		reward_min = np.min(self.gt_rewards_)
 		reward_max = np.max(self.gt_rewards_)
 
-		fig, ax = plt.subplots(1, 3, figsize=(7.9, 3))#, constrained_layout=True)
+		fig, ax = plt.subplots(1, 4, figsize=(7.9, 3))#, constrained_layout=True)
 		text = fig.text(0.4,0.1, "")
 
 		ax[0].set_position([0.05, 0.20399999999999999, 0.2, 0.7])
@@ -97,7 +97,7 @@ class Game:
 		ax[2].set_position([0.729, 0.20399999999999999, 0.2, 0.7])
 		for i in range(3):
 			if i == 0:
-				ax[i].imshow(self.gt_rewards_, interpolation='none', cmap=cmap, vmin=reward_min, vmax=reward_max, extent=[0, size, 0, size], zorder=0, picker=10)
+				 temp = ax[i].imshow(self.gt_rewards_, interpolation='none', cmap=cmap, vmin=reward_min, vmax=reward_max, extent=[0, size, 0, size], zorder=0, picker=10)
 
 			ax[i].set_xticklabels(list(alphabet))
 			ax[i].set_yticklabels(list(numbers))
@@ -148,7 +148,7 @@ class Game:
 		ax[2].set_title('Most Probable Learner Actions')
 
 		fig.suptitle("Training Iteration %d of %d" % (self.iter_, self.total_iters_), size='large')
-
+		fig.colorbar(temp,ax = ax[0])
 		# --- Add pick
 		def close_all(event):
 			if event.key == 'y' or event.key == 'c':
