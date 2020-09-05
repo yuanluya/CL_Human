@@ -57,7 +57,7 @@ class LearnHuman:
             w = self.learner.learn_cont(self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_, data_idx,
                                          self.gradients, self.step, self.teacher.stu_gt_reward_param_, self.learner.config_['cont_K'])        
         else:
-            w = learner.learn(self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_, data_idx,
+            w = self.learner.learn(self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_, data_idx,
                                          self.gradients, self.step, self.teacher.stu_gt_reward_param_, self.random_prob)          
         self.ws.append(copy.deepcopy(w))
         #print(learner.q_map_)
