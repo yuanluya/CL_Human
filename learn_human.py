@@ -4,7 +4,7 @@ import copy
 from session import Session
 
 class LearnHuman:
-    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback, map_num, s):
+    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback, map_num, s, random_prob = None):
         self.teacher = teacher
         self.learner = learner
         self.learner.reset(init_ws)
@@ -15,6 +15,7 @@ class LearnHuman:
         self.feedback = feedback
         self.map_num = map_num
         self.sess = s
+        self.random_prob = random_prob
 
         self.iteration_limit = train_iter
         self.idx_selected = True
@@ -52,9 +53,12 @@ class LearnHuman:
             return
         data_idx = self.g.selected_idx_
         self.selected_indices.append(data_idx)
-        w = self.learner.learn_cont(self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_, data_idx,
+        if self.random_prob == None:
+            w = self.learner.learn_cont(self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_, data_idx,
                                          self.gradients, self.step, self.teacher.stu_gt_reward_param_, self.learner.config_['cont_K'])        
-              
+        else:
+            w = learner.learn(self.teacher.mini_batch_indices_, self.teacher.mini_batch_opt_acts_, data_idx,
+                                         self.gradients, self.step, self.teacher.stu_gt_reward_param_, self.random_prob)          
         self.ws.append(copy.deepcopy(w))
         #print(learner.q_map_)
         self.policy.append(copy.deepcopy(self.learner.q_map_))

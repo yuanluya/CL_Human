@@ -11,12 +11,15 @@ exec('import config', globals())
 exec('from config import config_T', globals())
 exec('from config import config_L', globals())
 
-def run(map_num):
+def run(map_num, intro = False):
     s = Session(map_num)
 
     mode = config.mode
 
-    train_iter = config.train_iter
+    if intro:
+        train_iter = 10
+    else:
+        train_iter = config.train_iter
 
     np.set_printoptions(precision = 4)
 
@@ -36,6 +39,9 @@ def run(map_num):
     init_ws = np.random.uniform(-2, 2, size = [1, teacher.map_.num_states_])
     unshuffled_ws = copy.deepcopy(init_ws)
     test_set = np.random.choice(teacher.map_.num_states_, size = [train_iter + 1, teacher.map_.num_states_ * 20])
+    
+
     learner = LearnerIRL(map_l, config_L)
-    lfh = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s)
-    return lfh
+    lfh_ital = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s)
+    lfh_imt = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s, 1)
+    return lfh_ital, lfh_imt

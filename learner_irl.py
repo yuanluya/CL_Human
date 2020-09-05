@@ -84,6 +84,52 @@ class LearnerIRL:
 
         return self.current_mean_
 
+    def learn(self, mini_batch_indices, opt_actions, data_idx, gradients, step, gt_w, random_prob = None):
+        particle_gradients = []
+        for i in range(self.config_.particle_num):
+            val_map, q_map, _ = self.value_iter_op_(self.particles_[i: i + 1, ...], value_map_init = self.initial_val_maps_[i], hard_max = True)
+            if np.sum(np.isnan(val_map)) > 0:
+                pdb.set_trace()
+            self.initial_val_maps_[i] = val_map
+            valg_map, qg_map, _ = self.gradient_iter_op_(q_map, value_map_init = self.initial_valg_maps_[i])
+            if np.sum(np.isnan(valg_map)) > 0:
+                print("STEP", step)
+                print("PARTICLE NUM", i)
+                pdb.set_trace()
+            self.initial_valg_maps_[i] = valg_map
+
+            action_q = q_map[mini_batch_indices[data_idx]: mini_batch_indices[data_idx] + 1, ...]
+            exp_q = np.exp(self.config_.beta * (action_q - np.max(action_q)))
+            action_prob = exp_q / np.sum(exp_q, axis = 1, keepdims = True)
+            particle_gradient = self.config_.beta * (qg_map[mini_batch_indices[data_idx], opt_actions[data_idx]: opt_actions[data_idx] + 1, ...] -\
+                                                     np.sum(np.expand_dims(action_prob, 2) * qg_map[mini_batch_indices[data_idx]: mini_batch_indices[data_idx] + 1, ...], axis = 1))
+            particle_gradients.append(particle_gradient)
+        particle_gradients = np.concatenate(particle_gradients, axis = 0)
+        if np.sum(np.isnan(particle_gradients)) > 0:
+            pdb.set_trace()
+        self.particles_ += self.lr_ * particle_gradients
+
+        gradient = gradients[data_idx: data_idx + 1, ...]
+        target_center = self.current_mean_ + self.lr_ * gradient
+        val_target = self.lr_ * self.lr_ * np.sum(np.square(gradient)) +\
+                            2 * self.lr_ * np.sum((self.current_mean_ - self.particles_) * gradient, axis = 1)
+
+        gradients_cache = self.lr_ * self.lr_ * np.sum(np.square(gradients), axis = 1)
+
+        new_val_map, new_q_map, _ = self.value_iter_op_(target_center, value_map_init = self.initial_val_maps_[self.config_.particle_num], hard_max = True)
+        if np.sum(np.isnan(new_val_map)) > 0:
+            pdb.set_trace()
+        self.initial_val_maps_[self.config_.particle_num] = new_val_map
+        new_valg_map, _, _ = self.gradient_iter_op_(new_q_map, value_map_init = self.initial_valg_maps_[self.config_.particle_num])
+        self.initial_valg_maps_[self.config_.particle_num] = new_valg_map
+
+        self.particles_[0: 0 + 1, ...] = target_center
+        self.initial_val_maps_[0] = copy.deepcopy(new_val_map)
+        self.initial_valg_maps_[0] = copy.deepcopy(new_valg_map)
+
+        self.current_mean_ = np.mean(self.particles_, 0, keepdims = True)
+        return self.current_mean_
+        
     def current_action_prob(self):
         _, self.q_map_, _ = self.value_iter_op_(self.current_mean_, hard_max = True)
                                           #value_map_init = self.initial_val_maps_[self.config_.particle_num])
