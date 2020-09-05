@@ -13,7 +13,7 @@ exec('from config import config_L', globals())
 
 def run(map_num, intro = False):
     s = Session(map_num)
-
+    s2 = Session(map_num, True)
     mode = config.mode
 
     if intro:
@@ -43,5 +43,5 @@ def run(map_num, intro = False):
 
     learner = LearnerIRL(map_l, config_L)
     lfh_ital = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s)
-    lfh_imt = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s, 1)
+    lfh_imt = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s2, 1)
     return lfh_ital, lfh_imt

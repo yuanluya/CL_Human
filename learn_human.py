@@ -72,8 +72,12 @@ class LearnHuman:
                 'policy': self.policy,
                 'selected_indices': self.selected_indices
                }
-        np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
 
+        if (self.random_prob is None):
+            np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
+        else:
+            np.save('data/data%d_imt.npy' % (self.sess.random_seed), data, allow_pickle=True)
+            
         self.sess.save_data() 
         
     def reset(self):

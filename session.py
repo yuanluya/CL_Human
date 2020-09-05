@@ -65,9 +65,10 @@ class Session:
             if page_token is None:
                 break
 
-    def __init__(self, map_num):
+    def __init__(self, map_num, imt = False):
         self.map_num = map_num
         self.SCOPES = ['https://www.googleapis.com/auth/drive']
+        self.imt = imt
         creds = None
         # The file token.pickle stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
@@ -101,13 +102,16 @@ class Session:
 
 
     def save_data(self):
+        if (self.imt):
+            file_metadata = {'name': 'data%d_imt.npy' % (self.random_seed), 'parents': [self.folder_id]}
+            media = MediaFileUpload('data/data%d_imt.npy' % (self.random_seed), mimetype=None)
+        else:
+            file_metadata = {'name': 'data%d.npy' % (self.random_seed), 'parents': [self.folder_id]}
+            media = MediaFileUpload('data/data%d.npy' % (self.random_seed), mimetype=None)
 
-        file_metadata = {'name': 'data%d.npy' % (self.random_seed), 'parents': [self.folder_id]}
-
-        media = MediaFileUpload('data/data%d.npy' % (self.random_seed), mimetype=None)
         file = self.service.files().create(body=file_metadata,
-                                            media_body=media,
-                                            fields='id').execute()
+                                                media_body=media,
+                                                fields='id').execute()
         print('File ID: %s' % file.get('id'))
 
 if __name__ == '__main__':
