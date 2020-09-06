@@ -31,11 +31,8 @@ class Session:
 
         text = self.service.files().get_media(fileId=seed_file).execute().decode('UTF-8')
 
-        seeds_used = set([int(seed) for seed in text.split('\n')])
-        new_seed = np.random.randint(100000)
-
-        while (new_seed in seeds_used):
-            new_seed = np.random.randint(100000)
+        seeds_used = [int(seed) for seed in text.split('\n')]
+        new_seed = seeds_used[-1] + 1
 
         np.save("current_seed.npy", new_seed)
         text += ('\n%d' %(new_seed))
