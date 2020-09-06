@@ -91,7 +91,7 @@ class Game:
 
 		fig, ax = plt.subplots(1, 3, figsize=(7.9, 3))#, constrained_layout=True)
 		text = fig.text(0.4,0.1, "")
-
+		text.set_fontsize(11.5)
 		ax[0].set_position([0.05, 0.20399999999999999, 0.2, 0.7])
 		ax[1].set_position([0.4, 0.20399999999999999, 0.2, 0.7])
 		ax[2].set_position([0.729, 0.20399999999999999, 0.2, 0.7])
@@ -161,17 +161,17 @@ class Game:
 				if (self.teacher_idx_ is not None):
 					self.arrows0[self.teacher_idx_].set_color('darkorange')
 					self.arrows1[self.teacher_idx_].set_color('darkorange')
-				text.set_position((0.25,0.1))
-				text.set_text('Click the "‣ Run" button in the menubar to run the next iteration')
+				text.set_position((0.19,0.05))
+				text.set_text('        The orange arrow is the selection of a machine teacher.\nClick the "‣ Run" button in the menubar to run the next iteration.')
 				fig.canvas.draw()
 				plt.close('all')
 		def onpick(event):
-			text.set_position((0.31,0.1))
-			text.set_text('Press "c" to confirm the selected arrow')
+			text.set_position((0.31,0.09))
+			
 			artist = event.artist
 			if isinstance(artist, FancyArrow) or isinstance(artist, Rectangle):
 				print(artist._gid)
-
+				text.set_text('Press "c" to confirm the selected arrow')
 				if (self.selected_idx_ is not None):
 					self.arrows0[self.selected_idx_].set_color('black')
 					self.arrows1[self.selected_idx_].set_color('black')
