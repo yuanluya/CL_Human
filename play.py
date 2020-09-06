@@ -12,6 +12,7 @@ exec('from config import config_T', globals())
 exec('from config import config_L', globals())
 
 def run(map_num, intro = False):
+    print('[Initializing, please wait ...]')
     mode = config.mode
 
     if intro:
@@ -48,5 +49,6 @@ def run(map_num, intro = False):
 
     s2 = Session(map_num, True)
     lfh_imt = LearnHuman(teacher2, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s2, 1)
-
+    
+    print('[Finish initialization, please continue with next block]')
     return lfh_ital, lfh_imt

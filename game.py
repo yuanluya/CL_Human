@@ -162,7 +162,7 @@ class Game:
 					self.arrows0[self.teacher_idx_].set_color('darkorange')
 					self.arrows1[self.teacher_idx_].set_color('darkorange')
 				text.set_position((0.19,0.05))
-				text.set_text('        The orange arrow is the selection of a machine teacher.\nClick the "‣ Run" button in the menubar to run the next iteration.')
+				text.set_text('        The orange arrow is the selection of a machine teacher.\nClick the "▶ Run" button in the menubar to run the next iteration.')
 				fig.canvas.draw()
 				plt.close('all')
 		def onpick(event):
