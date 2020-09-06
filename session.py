@@ -98,7 +98,8 @@ class Session:
         else:
             self.random_seed = self.generate_random_seed()
 
-        np.random.seed(self.random_seed)
+    def reset_seed(self):
+        np.random.seed(2 * self.random_seed)
 
 
     def save_data(self):

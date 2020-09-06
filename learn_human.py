@@ -26,7 +26,7 @@ class LearnHuman:
         self.policy = []
         self.selected_indices = []
         
-    def chooseIdx(self):                
+    def chooseIdx(self):
         if self.idx_selected:
             self.step += 1
             self.teacher.sample()
@@ -36,7 +36,7 @@ class LearnHuman:
         else:
             self.idx_selected = True
         data_idx, self.gradients = self.teacher.choose(self.learner.current_mean_, self.learner.lr_, hard = True)
-        
+
         if self.feedback:
             self.g = Game(self.teacher_rewards, self.batches[-1], copy.deepcopy(self.learner.q_map_),
                           copy.deepcopy(self.learner.current_mean_), self.step, self.iteration_limit, data_idx)
@@ -64,32 +64,43 @@ class LearnHuman:
         self.policy.append(copy.deepcopy(self.learner.q_map_))
         if self.step == self.iteration_limit:
             print('All iterations are completed.')
-    def saveData(self):
-        data = {
-                'batches': self.batches,
-                'ws': self.ws,
-                'learned_rewards': self.learned_rewards,
-                'policy': self.policy,
-                'selected_indices': self.selected_indices
-               }
 
-        if (self.random_prob is None):
-            np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
-        else:
-            np.save('data/data%d_imt.npy' % (self.sess.random_seed), data, allow_pickle=True)
-            
-        self.sess.save_data() 
+    def saveData(self, retry=True):
+        try:
+            data = {
+                    'batches': self.batches,
+                    'ws': self.ws,
+                    'learned_rewards': self.learned_rewards,
+                    'policy': self.policy,
+                    'selected_indices': self.selected_indices
+                   }
+
+            if (self.random_prob is None):
+                np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
+            else:
+                np.save('data/data%d_imt.npy' % (self.sess.random_seed), data, allow_pickle=True)
+                
+            self.sess.save_data() 
+        except BrokenPipeError as e:
+            if (retry):
+                self.saveData(False)
+            else:
+                print("Problem saving. Please try again.")
         
     def reset(self):
         self.step = 0
         self.learner.reset(self.init_ws)
         self.batches = []
-        self.ws = []
+        self.ws = [self.init_ws]
         self.learned_rewards = []
         self.policy = []
         self.selected_indices = []
         
     def iteration(self):
+        if (self.step == 0):
+            self.reset()
+            self.sess.reset_seed()
+
         if (self.step > 0) and (self.step <= self.iteration_limit):
             self.updateLearner()
         if self.step < self.iteration_limit:
