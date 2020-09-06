@@ -84,13 +84,14 @@ class LearnHuman:
         self.step = 0
         self.learner.reset(self.init_ws)
         self.batches = []
-        self.ws = []
+        self.ws = [self.init_ws]
         self.learned_rewards = []
         self.policy = []
         self.selected_indices = []
         
     def iteration(self):
         if (self.step == 0):
+            self.reset()
             self.sess.reset_seed()
 
         if (self.step > 0) and (self.step <= self.iteration_limit):
