@@ -26,7 +26,7 @@ class LearnHuman:
         self.policy = []
         self.selected_indices = []
         
-    def chooseIdx(self):                
+    def chooseIdx(self):
         if self.idx_selected:
             self.step += 1
             self.teacher.sample()
@@ -36,7 +36,7 @@ class LearnHuman:
         else:
             self.idx_selected = True
         data_idx, self.gradients = self.teacher.choose(self.learner.current_mean_, self.learner.lr_, hard = True)
-        
+
         if self.feedback:
             self.g = Game(self.teacher_rewards, self.batches[-1], copy.deepcopy(self.learner.q_map_),
                           copy.deepcopy(self.learner.current_mean_), self.step, self.iteration_limit, data_idx)
@@ -90,6 +90,9 @@ class LearnHuman:
         self.selected_indices = []
         
     def iteration(self):
+        if (self.step == 0):
+            self.sess.reset_seed()
+
         if (self.step > 0) and (self.step <= self.iteration_limit):
             self.updateLearner()
         if self.step < self.iteration_limit:

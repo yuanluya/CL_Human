@@ -12,8 +12,6 @@ exec('from config import config_T', globals())
 exec('from config import config_L', globals())
 
 def run(map_num, intro = False):
-    s = Session(map_num)
-    s2 = Session(map_num, True)
     mode = config.mode
 
     if intro:
@@ -36,12 +34,19 @@ def run(map_num, intro = False):
     assert(np.max(abs(np.sum(gt_r_param_stu * map_l.state_feats_, axis = 1) - np.sum(gt_r_param_tea * map_t.state_feats_, axis = 1))) < 1e-9)
 
     teacher = TeacherIRL(map_t, config_T, gt_r_param_tea, gt_r_param_stu)
+    teacher2 = TeacherIRL(map_t, config_T, gt_r_param_tea, gt_r_param_stu)
+
     init_ws = np.random.uniform(-2, 2, size = [1, teacher.map_.num_states_])
     unshuffled_ws = copy.deepcopy(init_ws)
     test_set = np.random.choice(teacher.map_.num_states_, size = [train_iter + 1, teacher.map_.num_states_ * 20])
     
 
     learner = LearnerIRL(map_l, config_L)
+
+    s = Session(map_num)
     lfh_ital = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s)
-    lfh_imt = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s2, 1)
+
+    s2 = Session(map_num, True)
+    lfh_imt = LearnHuman(teacher2, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s2, 1)
+
     return lfh_ital, lfh_imt

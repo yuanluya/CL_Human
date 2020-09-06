@@ -5,6 +5,7 @@ import pdb
 
 class TeacherIRL:
     def __init__(self, map_input, config, gt_r_param, stu_gt_r_param):
+        np.random.seed(777)
         self.config_ = config
         self.reward_param_ = gt_r_param
         self.stu_gt_reward_param_ = stu_gt_r_param

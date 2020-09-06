@@ -86,7 +86,7 @@ class LearnerIRL:
 
     def learn(self, mini_batch_indices, opt_actions, data_idx, gradients, step, gt_w, random_prob = None):
         particle_gradients = []
-        for i in range(self.config_.particle_num):
+        for i in range(self.config_['particle_num']):
             val_map, q_map, _ = self.value_iter_op_(self.particles_[i: i + 1, ...], value_map_init = self.initial_val_maps_[i], hard_max = True)
             if np.sum(np.isnan(val_map)) > 0:
                 pdb.set_trace()
@@ -99,9 +99,9 @@ class LearnerIRL:
             self.initial_valg_maps_[i] = valg_map
 
             action_q = q_map[mini_batch_indices[data_idx]: mini_batch_indices[data_idx] + 1, ...]
-            exp_q = np.exp(self.config_.beta * (action_q - np.max(action_q)))
+            exp_q = np.exp(self.config_['beta'] * (action_q - np.max(action_q)))
             action_prob = exp_q / np.sum(exp_q, axis = 1, keepdims = True)
-            particle_gradient = self.config_.beta * (qg_map[mini_batch_indices[data_idx], opt_actions[data_idx]: opt_actions[data_idx] + 1, ...] -\
+            particle_gradient = self.config_['beta'] * (qg_map[mini_batch_indices[data_idx], opt_actions[data_idx]: opt_actions[data_idx] + 1, ...] -\
                                                      np.sum(np.expand_dims(action_prob, 2) * qg_map[mini_batch_indices[data_idx]: mini_batch_indices[data_idx] + 1, ...], axis = 1))
             particle_gradients.append(particle_gradient)
         particle_gradients = np.concatenate(particle_gradients, axis = 0)
@@ -116,12 +116,12 @@ class LearnerIRL:
 
         gradients_cache = self.lr_ * self.lr_ * np.sum(np.square(gradients), axis = 1)
 
-        new_val_map, new_q_map, _ = self.value_iter_op_(target_center, value_map_init = self.initial_val_maps_[self.config_.particle_num], hard_max = True)
+        new_val_map, new_q_map, _ = self.value_iter_op_(target_center, value_map_init = self.initial_val_maps_[self.config_['particle_num']], hard_max = True)
         if np.sum(np.isnan(new_val_map)) > 0:
             pdb.set_trace()
-        self.initial_val_maps_[self.config_.particle_num] = new_val_map
-        new_valg_map, _, _ = self.gradient_iter_op_(new_q_map, value_map_init = self.initial_valg_maps_[self.config_.particle_num])
-        self.initial_valg_maps_[self.config_.particle_num] = new_valg_map
+        self.initial_val_maps_[self.config_['particle_num']] = new_val_map
+        new_valg_map, _, _ = self.gradient_iter_op_(new_q_map, value_map_init = self.initial_valg_maps_[self.config_['particle_num']])
+        self.initial_valg_maps_[self.config_['particle_num']] = new_valg_map
 
         self.particles_[0: 0 + 1, ...] = target_center
         self.initial_val_maps_[0] = copy.deepcopy(new_val_map)
@@ -132,7 +132,7 @@ class LearnerIRL:
         
     def current_action_prob(self):
         _, self.q_map_, _ = self.value_iter_op_(self.current_mean_, hard_max = True)
-                                          #value_map_init = self.initial_val_maps_[self.config_.particle_num])
+                                          #value_map_init = self.initial_val_maps_[self.config_['particle_num']])
         q_balance = self.q_map_ - np.max(self.q_map_, axis = 1, keepdims = True)
         exp_q = np.exp(self.config_['beta'] * q_balance)
         self.action_probs_ = exp_q / np.sum(exp_q, axis = 1, keepdims = True)
