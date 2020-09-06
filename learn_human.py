@@ -64,21 +64,28 @@ class LearnHuman:
         self.policy.append(copy.deepcopy(self.learner.q_map_))
         if self.step == self.iteration_limit:
             print('All iterations are completed.')
-    def saveData(self):
-        data = {
-                'batches': self.batches,
-                'ws': self.ws,
-                'learned_rewards': self.learned_rewards,
-                'policy': self.policy,
-                'selected_indices': self.selected_indices
-               }
 
-        if (self.random_prob is None):
-            np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
-        else:
-            np.save('data/data%d_imt.npy' % (self.sess.random_seed), data, allow_pickle=True)
-            
-        self.sess.save_data() 
+    def saveData(self, retry=True):
+        try:
+            data = {
+                    'batches': self.batches,
+                    'ws': self.ws,
+                    'learned_rewards': self.learned_rewards,
+                    'policy': self.policy,
+                    'selected_indices': self.selected_indices
+                   }
+
+            if (self.random_prob is None):
+                np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
+            else:
+                np.save('data/data%d_imt.npy' % (self.sess.random_seed), data, allow_pickle=True)
+                
+            self.sess.save_data() 
+        except BrokenPipeError as e:
+            if (retry):
+                self.saveData(False)
+            else:
+                print("Problem saving. Please try again.")
         
     def reset(self):
         self.step = 0
