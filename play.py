@@ -42,6 +42,6 @@ def run(map_num, intro = False):
     
 
     learner = LearnerIRL(map_l, config_L)
-    lfh_ital = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s)
-    lfh_imt = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, config.train_iter, config.feedback, map_num, s2, 1)
+    lfh_ital = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s)
+    lfh_imt = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s2, 1)
     return lfh_ital, lfh_imt
