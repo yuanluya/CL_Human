@@ -30,7 +30,6 @@ class Session:
                 break
 
         text = self.service.files().get_media(fileId=seed_file).execute().decode('UTF-8')
-
         seeds_used = [int(seed) for seed in text.split('\n')]
         new_seed = seeds_used[-1] + 1
 
@@ -104,8 +103,8 @@ class Session:
             file_metadata = {'name': 'data%d_imt.npy' % (self.random_seed), 'parents': [self.folder_id]}
             media = MediaFileUpload('data/data%d_imt.npy' % (self.random_seed), mimetype=None)
         else:
-            file_metadata = {'name': 'data%d.npy' % (self.random_seed), 'parents': [self.folder_id]}
-            media = MediaFileUpload('data/data%d.npy' % (self.random_seed), mimetype=None)
+            file_metadata = {'name': 'data%d_ital.npy' % (self.random_seed), 'parents': [self.folder_id]}
+            media = MediaFileUpload('data/data%d_ital.npy' % (self.random_seed), mimetype=None)
 
         file = self.service.files().create(body=file_metadata,
                                                 media_body=media,
