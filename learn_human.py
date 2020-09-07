@@ -76,7 +76,7 @@ class LearnHuman:
                    }
 
             if (self.random_prob is None):
-                np.save('data/data%d.npy' % (self.sess.random_seed), data, allow_pickle=True)
+                np.save('data/data%d_ital.npy' % (self.sess.random_seed), data, allow_pickle=True)
             else:
                 np.save('data/data%d_imt.npy' % (self.sess.random_seed), data, allow_pickle=True)
                 
