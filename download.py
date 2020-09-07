@@ -32,6 +32,7 @@ class DataDownload:
     def __init__(self, seed, map_num):
         self.seed = seed
         self.map_num = map_num
+        self.download() 
 
     def download(self):
         seed = self.seed
@@ -184,7 +185,7 @@ class DataDownload:
     def graph_data(self):
 
         data_ital = np.load("map_%d_data%d_ital.npy" % (self.map_num, self.seed))[()]
-        data_imt = np.load("map_%d_data%d_imt.npy.npy")[()]
+        data_imt = np.load("map_%d_data%d_imt.npy"  % (self.map_num, self.seed))[()]
 
         use_tf = False
         multi_thread = False
@@ -281,7 +282,8 @@ class DataDownload:
         pdb.set_trace()
 
 if __name__ == '__main__':
-    d = DataDownload(21883, 4)
+    d = DataDownload(6, 7)
+
     d.graph_data()
 
 
