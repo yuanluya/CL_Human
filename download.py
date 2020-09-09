@@ -184,8 +184,8 @@ class DataDownload:
 
     def graph_data(self):
 
-        data_ital = np.load("map_%d_data%d_ital.npy" % (self.map_num, self.seed))[()]
-        data_imt = np.load("map_%d_data%d_imt.npy"  % (self.map_num, self.seed))[()]
+        data_ital = np.load("map_%d_data%d_ital.npy" % (self.map_num, self.seed), allow_pickle = True)[()]
+        data_imt = np.load("map_%d_data%d_imt.npy"  % (self.map_num, self.seed), allow_pickle = True)[()]
 
         use_tf = False
         multi_thread = False
@@ -282,7 +282,9 @@ class DataDownload:
         plt.show()
 
 if __name__ == '__main__':
-    d = DataDownload(int(sys.argv[1]), int(sys.argv[2]))
+    seed = int(sys.argv[1])
+    map_id = int(sys.argv[2])
+    d = DataDownload(seed, map_id)
     d.graph_data()
 
 
