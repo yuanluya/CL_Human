@@ -109,7 +109,7 @@ class Session:
         file = self.service.files().create(body=file_metadata,
                                                 media_body=media,
                                                 fields='id').execute()
-        print('File ID: %s' % file.get('id'))
+        print('Successfully saved! File ID: %s' % file.get('id'))
 
 if __name__ == '__main__':
     s = Session(3)
