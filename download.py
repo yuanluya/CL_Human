@@ -224,7 +224,7 @@ class DataDownload:
         gt_r_param_stu = copy.deepcopy(gt_r_param_tea)
 
         test_set = np.random.choice(25, size = [30 + 1, 25 * 20])
-        init_ws = data_imt['ws'][0]
+        init_ws = data_ital['ws'][0]
         
 
         teacher = TeacherIRL(map_t, config_T, gt_r_param_tea, gt_r_param_stu)
@@ -242,7 +242,7 @@ class DataDownload:
         human = self.learn(teacher, learner, '%s_cont' % mode, init_ws, train_iter, test_set, gt_r_param_tea, data_ital,  None, True)
         imt_human = self.learn(teacher, learner, '%s_cont' % mode, init_ws, train_iter, test_set, gt_r_param_tea, data_imt, 1, True)
 
-        prag_cont = self.learn(teacher, learner, '%s_cont' % mode, init_ws, train_iter, test_set, gt_r_param_tea, data_imt, None)
+        prag_cont = self.learn(teacher, learner, '%s_cont' % mode, init_ws, train_iter, test_set, gt_r_param_tea, data_ital, None)
         imt = self.learn(teacher, learner, '%s_cont' % mode, init_ws, train_iter, test_set, gt_r_param_tea, data_imt, 1)
 
 
@@ -277,13 +277,12 @@ class DataDownload:
         axs[1, 1].set_title('actual rewards (every 2 iter)')
         axs[1, 1].plot([teacher_reward] * len(prag_cont[3]))
 
+        plt.suptitle("Seed %d, Map %d" % (self.seed, self.map_num))
         plt.savefig('figure%d_%d.png' % (self.seed, self.map_num))    
         plt.show()
-        pdb.set_trace()
 
 if __name__ == '__main__':
-    d = DataDownload(6, 7)
-
+    d = DataDownload(int(sys.argv[1]), int(sys.argv[2]))
     d.graph_data()
 
 
