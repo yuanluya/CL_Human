@@ -95,7 +95,7 @@ class LearnHuman:
         if self.data_saved:
             print("Data saved successfully!")
         else:
-            print("Data was not saved. Please run the iteration cell again!") 
+            print("Data was not saved because there should be %d more iterations for the previous trial, please run the iteration cell again!" % (self.iteration_limit - self.step)) 
 
     def reset(self):
         self.step = 0
