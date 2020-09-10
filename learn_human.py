@@ -25,7 +25,8 @@ class LearnHuman:
         self.learned_rewards = []
         self.policy = []
         self.selected_indices = []
-        
+        self.data_saved = False 
+
     def chooseIdx(self):
         if self.idx_selected:
             self.step += 1
@@ -63,7 +64,8 @@ class LearnHuman:
         #print(learner.q_map_)
         self.policy.append(copy.deepcopy(self.learner.q_map_))
         if self.step == self.iteration_limit:
-            print('All iterations are completed.')
+            print('All iterations are completed, saving data now.')
+            self.saveData()
 
     def saveData(self, retry=True):
         try:
@@ -81,12 +83,20 @@ class LearnHuman:
                 np.save('data/data%d_imt.npy' % (self.sess.random_seed), data, allow_pickle=True)
                 
             self.sess.save_data() 
+            self.data_saved = True
+
         except BrokenPipeError as e:
             if (retry):
                 self.saveData(False)
             else:
                 print("Problem saving. Please try again.")
-        
+    
+    def check_save(self):
+        if self.data_saved:
+            print("Data saved successfully!")
+        else:
+            print("Data was not saved. Please run the iteration cell again!") 
+
     def reset(self):
         self.step = 0
         self.learner.reset(self.init_ws)
