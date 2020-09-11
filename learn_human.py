@@ -65,7 +65,8 @@ class LearnHuman:
         self.policy.append(copy.deepcopy(self.learner.q_map_))
         if self.step == self.iteration_limit:
             print('All iterations are completed, saving data now.')
-            self.saveData()
+            if not self.data_saved:
+                self.saveData()
 
     def saveData(self, retry=True):
         try:
