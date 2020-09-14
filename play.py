@@ -45,14 +45,14 @@ def run(map_num, intro = False):
     learner = LearnerIRL(map_l, config_L)
 
     s = Session(map_num)
-    lfh_1 = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s)
+    lfh_1 = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s, None, intro)
 
     s2 = Session(map_num, True)
-    lfh_2 = LearnHuman(teacher2, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s2, 1)
+    lfh_2 = LearnHuman(teacher2, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s2, 1, intro)
     
     rd = np.random.uniform()
     print('[Finish initialization, please continue with next block]')
-    if rd > 0.5:
+    if rd > 0.5 or intro:
         return lfh_1, lfh_2
     else:
         return lfh_2, lfh_1

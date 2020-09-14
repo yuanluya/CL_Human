@@ -4,7 +4,7 @@ import copy
 from session import Session
 
 class LearnHuman:
-    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback, map_num, s, random_prob = None):
+    def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback, map_num, s, random_prob, intro):
         self.teacher = teacher
         self.learner = learner
         self.learner.reset(init_ws)
@@ -16,6 +16,7 @@ class LearnHuman:
         self.map_num = map_num
         self.sess = s
         self.random_prob = random_prob
+        self.intro = intro 
 
         self.iteration_limit = train_iter
         self.idx_selected = True
@@ -69,6 +70,9 @@ class LearnHuman:
                 self.saveData()
 
     def saveData(self, retry=True):
+        if self.intro:
+            return
+            
         try:
             data = {
                     'batches': self.batches,
