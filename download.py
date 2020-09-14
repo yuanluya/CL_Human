@@ -424,6 +424,6 @@ if __name__ == '__main__':
     seed = int(sys.argv[1])
     map_id = int(sys.argv[2])
     d = DataDownload(seed, map_id)
-    d.graph_data()
+    #d.graph_data()
 
 
