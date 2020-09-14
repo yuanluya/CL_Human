@@ -281,6 +281,141 @@ class DataDownload:
         plt.savefig('figure%d_%d.png' % (self.seed, self.map_num))    
         plt.show()
 
+
+def learn(teacher, learner, mode, init_ws, train_iter, test_set, teacher_rewards, data, random_prob = None, human = False):
+
+    learner.reset(init_ws)
+    teaching_examples = []
+    batches = []
+    dists_ = [np.sqrt(np.sum(np.square(learner.current_mean_ - teacher.stu_gt_reward_param_)))]
+    dists = [np.mean(np.max(abs(learner.current_action_prob() - teacher.action_probs_), axis = 1))]
+    distsq = [np.mean(np.square(learner.q_map_ - teacher.q_map_))]
+    actual_rewards = [teacher.map_.test_walk(teacher.reward_param_, learner.action_probs_, test_set[0], greedy = True)]
+    ws = []
+    learned_rewards = []
+    policy = []
+
+    for i in tqdm(range(train_iter)):
+        teacher.mini_batch_indices_ = data['batches'][i][0]
+        teacher.mini_batch_opt_acts_ = data['batches'][i][1]
+
+        learned_rewards.append(copy.deepcopy(learner.current_mean_))
+
+        data_idx, gradients = teacher.choose(learner.current_mean_, learner.lr_, hard = True)
+        if (human):
+            data_idx = data['selected_indices'][i]
+
+        if mode == 'omni' or random_prob is not None:
+            w = learner.learn(teacher.mini_batch_indices_, teacher.mini_batch_opt_acts_, data_idx,
+                                         gradients, i, teacher.stu_gt_reward_param_, random_prob)
+        elif mode == 'omni_cont':
+            w = learner.learn_cont(teacher.mini_batch_indices_, teacher.mini_batch_opt_acts_, data_idx,
+                                         gradients, i, teacher.stu_gt_reward_param_, learner.config_['cont_K'])
+
+        dists_.append(np.sqrt(np.sum(np.square(learner.current_mean_ - teacher.stu_gt_reward_param_))))
+        dists.append(np.mean(np.max(abs(learner.current_action_prob() - teacher.action_probs_), axis = 1)))
+        distsq.append(np.mean(np.square(learner.q_map_ - teacher.q_map_)))        
+        ws.append(copy.deepcopy(w))
+        #print(learner.q_map_)
+        policy.append(copy.deepcopy(learner.q_map_))
+
+        if (i + 1) % 2 == 0:
+            actual_rewards.append(teacher.map_.test_walk(teacher.reward_param_, learner.action_probs_, test_set[i + 1], greedy = True))
+
+    return np.array(dists), np.array(dists_), np.array(distsq), np.array(actual_rewards), ws, teaching_examples
+
+def download_all(seed_low, seed_high, map_num):
+    for s in range(seed_low, seed_high + 1):
+        DataDownload(s, map_num)
+
+def plot_average(seed_low, seed_high, map_num):
+    download_all(seed_low, seed_high, map_num)
+    exec('import config', globals())
+    exec('from config import config_T', globals())
+    exec('from config import config_L', globals())
+    np.set_printoptions(precision = 4)
+
+    map_l = Map(config_L)
+    map_t = Map(config_T)
+
+    gt_r_param_tea = map_l.reward_grid(self.map_num)
+    gt_r_param_stu = copy.deepcopy(gt_r_param_tea)
+
+    test_set = np.random.choice(25, size = [30 + 1, 25 * 20])
+
+    teacher = TeacherIRL(map_t, config_T, gt_r_param_tea, gt_r_param_stu)
+    learner = LearnerIRL(map_l, config_L)
+
+    data_ital = np.load("map_%d_data%d_ital.npy" % (map_num, seed_low), allow_pickle = True)[()]
+    data_imt = np.load("map_%d_data%d_imt.npy"  % (map_num, seed_low), allow_pickle = True)[()] 
+    init_ws = data_ital['ws'][0]
+
+    human = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_ital,  None, True)
+    imt_human = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_imt, 1, True)
+    prag_cont = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_ital, None)
+    imt = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_imt, 1)    
+    
+    human_acc = human[0:3]
+    imt_human_acc = imt_human[0:3]
+    prag_cont_acc = prag_cont[0:3]
+    imt_acc = imt[0:3]
+
+    for s in range(seed_low + 1, seed_high + 1):
+        data_ital = np.load("map_%d_data%d_ital.npy" % (map_num, s), allow_pickle = True)[()]
+        data_imt = np.load("map_%d_data%d_imt.npy"  % (map_num, s), allow_pickle = True)[()] 
+        init_ws = data_ital['ws'][0]
+
+        human = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_ital,  None, True)
+        imt_human = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_imt, 1, True)
+        prag_cont = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_ital, None)
+        imt = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_imt, 1)    
+        for i in range(4):
+            human_acc[i] += human[i]
+            imt_human_acc[i] += imt_human[i]
+            prag_cont_acc[i] += prag_cont[i]
+            imt_acc[i] += imt[i]
+
+    for i in range(4):        
+        human_acc[i] = human_acc[i]/(seed_high + 1 - seed_low)
+        imt_human_acc[i] = imt_human_acc[i]/(seed_high + 1 - seed_low)
+        prag_cont_acc[i] = prag_cont_acc[i]/(seed_high + 1 - seed_low)
+        imt_acc[i] = imt_acc[i]/(seed_high + 1 - seed_low)
+    
+    fig, axs = plt.subplots(2,2, figsize=(10,10), constrained_layout=True)
+    axs[0, 0].plot(prag_cont_acc[0])
+    axs[0, 0].plot(human_acc[0])
+    axs[0, 0].plot(imt_acc[0])
+    axs[0, 0].plot(imt_human_acc[0])
+
+    axs[0, 0].set_title('action prob total variation distance')
+
+    axs[0, 1].plot(prag_cont_acc[1], label='ITAL')
+    axs[0, 1].plot(human_acc[1], label='ITAL, Human')
+    axs[0, 1].plot(imt_acc[1], label='IMT')
+    axs[0, 1].plot(imt_human_acc[1], label='IMT, Human')
+
+    axs[0, 1].legend()
+
+    axs[0, 1].set_title('reward param l2 dist')
+
+    axs[1, 0].set_title('q l2 dist')
+    axs[1, 0].plot(prag_cont_acc[2])
+    axs[1, 0].plot(human_acc[2])
+    axs[1, 0].plot(imt_acc[2])
+    axs[1, 0].plot(imt_human_acc[2])
+
+    axs[1, 1].plot(prag_cont_acc[3])
+    axs[1, 1].plot(human_acc[3])
+    axs[1, 1].plot(imt_acc[3])
+    axs[1, 1].plot(imt_human_acc[3])
+
+    axs[1, 1].set_title('actual rewards (every 2 iter)')
+    axs[1, 1].plot([teacher_reward] * len(prag_cont_acc[3]))
+
+    plt.suptitle("Map %d" % (self.map_num))
+    plt.savefig('figure%d.png' % (self.map_num))    
+    plt.show()
+
 if __name__ == '__main__':
     seed = int(sys.argv[1])
     map_id = int(sys.argv[2])
