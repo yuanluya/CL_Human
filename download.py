@@ -344,6 +344,10 @@ def plot_average(seed_low, seed_high, map_num):
     test_set = np.random.choice(25, size = [30 + 1, 25 * 20])
 
     teacher = TeacherIRL(map_t, config_T, gt_r_param_tea, gt_r_param_stu)
+    teacher_rewards = []
+    for i in tqdm(range(0, train_iter, 2)):
+        teacher_rewards.append(teacher.map_.test_walk(teacher.reward_param_, teacher.action_probs_, test_set[i + 1], greedy = True))
+    teacher_reward = np.asarray([np.mean(teacher_rewards)])
     learner = LearnerIRL(map_l, config_L)
 
     data_ital = np.load("map_%d_data%d_ital.npy" % (map_num, seed_low), allow_pickle = True)[()]
