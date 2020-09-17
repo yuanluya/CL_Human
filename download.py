@@ -325,11 +325,21 @@ def learn(teacher, learner, mode, init_ws, train_iter, test_set, teacher_rewards
     return np.array(dists), np.array(dists_), np.array(distsq), np.array(actual_rewards), ws, teaching_examples
 
 def download_all(seed_low, seed_high, map_num):
+    
+    downloaded = []
     for s in range(seed_low, seed_high + 1):
-        DataDownload(s, map_num)
+        try:
+            DataDownload(s, map_num)
+            downloaded.append(s)
+        except UnboundLocalError:
+            continue
+    return downloaded
 
 def plot_average(seed_low, seed_high, map_num):
-    download_all(seed_low, seed_high, map_num)
+    downloaded = download_all(seed_low, seed_high, map_num)
+    if not downloaded:
+        print("No seeds downloaded.")
+        return
     exec('import config', globals())
     exec('from config import config_T', globals())
     exec('from config import config_L', globals())
@@ -350,8 +360,8 @@ def plot_average(seed_low, seed_high, map_num):
     teacher_reward = np.asarray([np.mean(teacher_rewards)])
     learner = LearnerIRL(map_l, config_L)
 
-    data_ital = np.load("map_%d_data%d_ital.npy" % (map_num, seed_low), allow_pickle = True)[()]
-    data_imt = np.load("map_%d_data%d_imt.npy"  % (map_num, seed_low), allow_pickle = True)[()] 
+    data_ital = np.load("map_%d_data%d_ital.npy" % (map_num, downloaded[0]), allow_pickle = True)[()]
+    data_imt = np.load("map_%d_data%d_imt.npy"  % (map_num, downloaded[0]), allow_pickle = True)[()] 
     init_ws = data_ital['ws'][0]
 
     human = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_ital,  None, True)
@@ -364,7 +374,7 @@ def plot_average(seed_low, seed_high, map_num):
     prag_cont_acc = [prag_cont[i] for i in range(4)]
     imt_acc = [imt[i] for i in range(4)]
 
-    for s in range(seed_low + 1, seed_high + 1):
+    for s in downloaded[1:]:
         data_ital = np.load("map_%d_data%d_ital.npy" % (map_num, s), allow_pickle = True)[()]
         data_imt = np.load("map_%d_data%d_imt.npy"  % (map_num, s), allow_pickle = True)[()] 
         init_ws = data_ital['ws'][0]
@@ -420,10 +430,82 @@ def plot_average(seed_low, seed_high, map_num):
     plt.savefig('figure%d.png' % (map_num))    
     plt.show()
 
+def histogram(seed_low, seed_high, map_num):
+    downloaded = download_all(seed_low, seed_high, map_num)
+    if not downloaded:
+        print("No seeds downloaded.")
+        return
+    exec('import config', globals())
+    exec('from config import config_T', globals())
+    exec('from config import config_L', globals())
+    np.set_printoptions(precision = 4)
+
+    map_l = Map(config_L)
+    map_t = Map(config_T)
+
+    gt_r_param_tea = map_l.reward_grid(map_num)
+    gt_r_param_stu = copy.deepcopy(gt_r_param_tea)
+
+    test_set = np.random.choice(25, size = [30 + 1, 25 * 20])
+    teacher = TeacherIRL(map_t, config_T, gt_r_param_tea, gt_r_param_stu)
+    teacher_rewards = []
+    for i in tqdm(range(0, config.train_iter, 2)):
+        teacher_rewards.append(teacher.map_.test_walk(teacher.reward_param_, teacher.action_probs_, test_set[i + 1], greedy = True))
+    teacher_reward = np.asarray([np.mean(teacher_rewards)])
+    learner = LearnerIRL(map_l, config_L)
+  
+    human_acc = [[],[],[],[]]
+    imt_human_acc = [[],[],[],[]]
+    prag_cont_acc = [[],[],[],[]]
+    imt_acc = [[],[],[],[]]
+
+    for s in downloaded[0:]:
+        data_ital = np.load("map_%d_data%d_ital.npy" % (map_num, s), allow_pickle = True)[()]
+        data_imt = np.load("map_%d_data%d_imt.npy"  % (map_num, s), allow_pickle = True)[()] 
+        init_ws = data_ital['ws'][0]
+
+        human = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_ital,  None, True)
+        imt_human = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_imt, 1, True)
+        prag_cont = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_ital, None)
+        imt = learn(teacher, learner, '%s_cont' % config.mode, init_ws, config.train_iter, test_set, gt_r_param_tea, data_imt, 1)    
+        for i in range(4):
+            if i != 3:
+                human_acc[i].append(human[i][-1]-human[i][0]) 
+                imt_human_acc[i].append(imt_human[i][-1]-imt_human[i][0]) 
+                prag_cont_acc[i].append(prag_cont[i][-1]-prag_cont[i][0]) 
+                imt_acc[i].append(imt[i][-1]-imt[i][0])
+            else:
+                human_acc[i].append((human[i][-1]-human[i][0])[0]) 
+                imt_human_acc[i].append((imt_human[i][-1]-imt_human[i][0])[0]) 
+                prag_cont_acc[i].append((prag_cont[i][-1]-prag_cont[i][0])[0]) 
+                imt_acc[i].append((imt[i][-1]-imt[i][0])[0])
+
+    colors = ['orange', 'blue', 'red', 'green']
+
+    num_bins = 10
+    fig, axs = plt.subplots(2,2, figsize=(10,10), constrained_layout=True)
+    axs[0, 0].hist([human_acc[0],imt_human_acc[0],prag_cont_acc[0],imt_acc[0]], num_bins, histtype='bar', color=colors)
+    axs[0, 0].set_title('action prob total variation distance')
+
+    labels = ['ITAL, Human', 'IMT, Human', 'ITAL', 'IMT'] 
+
+    axs[0, 1].hist([human_acc[1],imt_human_acc[1],prag_cont_acc[1],imt_acc[1]], num_bins, histtype='bar', label=labels, color=colors)
+    axs[0, 1].legend()
+    axs[0, 1].set_title('reward param l2 dist')
+
+    axs[1, 0].set_title('q l2 dist')
+    axs[1, 0].hist([human_acc[2],imt_human_acc[2],prag_cont_acc[2],imt_acc[2]], num_bins, histtype='bar', color=colors)
+
+    axs[1, 1].set_title('actual rewards (every 2 iter)')
+    axs[1, 1].hist([human_acc[3],imt_human_acc[3],prag_cont_acc[3],imt_acc[3]], num_bins, histtype='bar', color=colors)
+
+    plt.suptitle("Map %d" % (map_num))
+    plt.savefig('figure%d.png' % (map_num))    
+    plt.show()
 if __name__ == '__main__':
     seed = int(sys.argv[1])
     map_id = int(sys.argv[2])
     d = DataDownload(seed, map_id)
-    d.graph_data()
+    #d.graph_data()
 
 
