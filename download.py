@@ -502,6 +502,8 @@ def histogram(seed_low, seed_high, map_num):
     plt.suptitle("Map %d" % (map_num))
     plt.savefig('figure%d.png' % (map_num))    
     plt.show()
+
+    
 if __name__ == '__main__':
     seed = int(sys.argv[1])
     map_id = int(sys.argv[2])
