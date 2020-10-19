@@ -1,15 +1,14 @@
 import numpy as np
 import copy
 
-from map import Map
-from teacher_irl import TeacherIRL
-from learner_irl import LearnerIRL
-from learn_human import LearnHuman
-from session import Session 
+from Game.map import Map
+from CL.teacher_irl import TeacherIRL
+from CL.learner_irl import LearnerIRL
+from Game.learn_human import LearnHuman
 
-exec('import config', globals())
-exec('from config import config_T', globals())
-exec('from config import config_L', globals())
+exec('from CL import config', globals())
+exec('from CL.config import config_T', globals())
+exec('from CL.config import config_L', globals())
 
 def run(map_num, intro = False):
     print('[Initializing, please wait ...]')
@@ -44,11 +43,9 @@ def run(map_num, intro = False):
 
     learner = LearnerIRL(map_l, config_L)
 
-    s = Session(map_num)
-    lfh_1 = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s, None, intro)
+    lfh_1 = LearnHuman(teacher, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, None, None, intro)
 
-    s2 = Session(map_num, True)
-    lfh_2 = LearnHuman(teacher2, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, s2, 1, intro)
+    lfh_2 = LearnHuman(teacher2, learner, init_ws, test_set, gt_r_param_tea, train_iter, config.feedback, map_num, None, 1, intro)
     
     rd = np.random.uniform()
     print('[Finish initialization, please continue with next block]')

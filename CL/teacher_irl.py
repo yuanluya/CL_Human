@@ -1,5 +1,5 @@
 import numpy as np
-from map import Map
+from Game.map import Map
 
 import pdb
 

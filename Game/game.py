@@ -4,6 +4,8 @@ from matplotlib.colors import ListedColormap
 from matplotlib import cm 
 from matplotlib.patches import Rectangle
 from matplotlib.patches import FancyArrow
+import matplotlib.ticker as ticker
+
 import time 
 
 class Game:
@@ -99,10 +101,10 @@ class Game:
 			if i == 0:
 				 ax[i].imshow(self.gt_rewards_, interpolation='none', cmap=cmap, vmin=reward_min, vmax=reward_max, extent=[0, size, 0, size], zorder=0, picker=10)
 
-			ax[i].set_xticklabels(list(alphabet))
-			ax[i].set_yticklabels(list(numbers))
-			ax[i].set_xticks(np.arange(0.5, size + 0.5, 1))
-			ax[i].set_yticks(np.arange(0.5, size + 0.5, 1))
+			ax[i].xaxis.set_major_locator(ticker.FixedLocator(np.arange(0.5, size+0.5, 1)))
+			ax[i].xaxis.set_major_formatter(ticker.FixedFormatter(list(alphabet)))
+			ax[i].yaxis.set_major_locator(ticker.FixedLocator(np.arange(0.5, size+0.5, 1)))
+			ax[i].yaxis.set_major_formatter(ticker.FixedFormatter(list(numbers)))
 
 			for x in range(self.shape):
 				ax[i].axhline(x, lw=1, color='k', zorder=self.shape)

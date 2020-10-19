@@ -1,7 +1,6 @@
 import numpy as np
-from game import Game
+from Game.game import Game
 import copy
-from session import Session
 
 class LearnHuman:
     def __init__(self, teacher, learner, init_ws, test_set, teacher_rewards, train_iter, feedback, map_num, s, random_prob, intro):
@@ -26,7 +25,7 @@ class LearnHuman:
         self.learned_rewards = []
         self.policy = []
         self.selected_indices = []
-        self.data_saved = False 
+        self.data_saved = True 
 
     def chooseIdx(self):
         if self.idx_selected:
@@ -66,8 +65,6 @@ class LearnHuman:
         self.policy.append(copy.deepcopy(self.learner.q_map_))
         if self.step == self.iteration_limit:
             print('All iterations are completed, saving data now.')
-            if not self.data_saved:
-                self.saveData()
 
     def saveData(self, retry=True):
         if self.intro:
@@ -114,7 +111,6 @@ class LearnHuman:
     def iteration(self):
         if (self.step == 0):
             self.reset()
-            self.sess.reset_seed()
 
         if (self.step > 0) and (self.step <= self.iteration_limit):
             self.updateLearner()

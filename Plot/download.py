@@ -26,7 +26,7 @@ if plt.get_backend() == 'Qt5Agg':
 import time
 import pdb
 
-from game import Game
+from Game.game import Game
 
 import seaborn as sns
 import pandas as pd
